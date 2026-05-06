@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"package": "tapm.lavacan.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"AbstractContainerScreenMixin",
+		"ContainerScreenAccessor",
+		"RecipeBookScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
