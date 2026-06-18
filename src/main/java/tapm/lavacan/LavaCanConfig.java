@@ -13,90 +13,95 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class LavaCanConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("lavacan.json");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final Set<Identifier> DEFAULT_EXCLUDED = buildDefaultExcluded();
+    // Current config key. The legacy "excluded" key is still read for backwards compatibility.
+    private static final String KEY_PROTECTED = "protected";
+    private static final String KEY_LEGACY = "excluded";
 
-    private static Set<Identifier> buildDefaultExcluded() {
-        Set<Identifier> excluded = new HashSet<>();
+    private static final Set<Identifier> DEFAULT_PROTECTED = buildDefaultProtected();
+
+    private static Set<Identifier> buildDefaultProtected() {
+        Set<Identifier> defaults = new HashSet<>();
 
         // --- Unique / once-per-world ---
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DRAGON_EGG));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DRAGON_EGG));
 
         // --- Boss drops & end-game rewards ---
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.NETHER_STAR));       // Wither drop
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.ELYTRA));            // End ship
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.TRIDENT));           // Rare Drowned drop
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.TOTEM_OF_UNDYING)); // Evoker/raid drop
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.NETHER_STAR));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.ELYTRA));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.TRIDENT));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.TOTEM_OF_UNDYING));
 
         // --- Containers (may hold valuable contents) ---
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.SHULKER_BOX));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.SHULKER_SHELL));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.BUNDLE));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.ENDER_CHEST));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.SHULKER_BOX));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.SHULKER_SHELL));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.BUNDLE));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.ENDER_CHEST));
 
         // All 16 dyed shulker boxes
         Items.DYED_SHULKER_BOX.forEach(item ->
-                excluded.add(BuiltInRegistries.ITEM.getKey(item))
+                defaults.add(BuiltInRegistries.ITEM.getKey(item))
         );
         // All dyed bundles
         Items.DYED_BUNDLE.forEach(item ->
-                excluded.add(BuiltInRegistries.ITEM.getKey(item))
+                defaults.add(BuiltInRegistries.ITEM.getKey(item))
         );
 
         // --- Rare craftables / valuable blocks ---
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.BEACON));            // Nether star + rare mats
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.CONDUIT));           // Heart of the Sea + 8 nautilus shells
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.ENCHANTING_TABLE)); // 2 diamonds
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.ANVIL));             // 3 iron blocks + 4 iron ingots
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.END_CRYSTAL));       // Ghast tear + ender eye + glass
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.RESPAWN_ANCHOR));   // 6 crying obsidian + 3 glowstone
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.BEACON));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.CONDUIT));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.ENCHANTING_TABLE));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.ANVIL));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.END_CRYSTAL));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.RESPAWN_ANCHOR));
 
         // --- Rare ingredients & components ---
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.HEART_OF_THE_SEA)); // Buried treasure, 1 per chest
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.ECHO_SHARD));        // Ancient city only
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.RECOVERY_COMPASS)); // 8 echo shards
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.HEAVY_CORE));        // Rare ominous vault loot
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.MACE));              // Crafted from heavy core
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.BREEZE_ROD));        // Breeze drop
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.TRIAL_KEY));         // Trial chamber
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.OMINOUS_TRIAL_KEY));// Ominous trial chamber
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.ENCHANTED_GOLDEN_APPLE)); // Rare chest loot only
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.SNIFFER_EGG));       // Archaeology, one per ancient city
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DRIED_GHAST));       // Rare Nether structure
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.HEART_OF_THE_SEA));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.ECHO_SHARD));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.RECOVERY_COMPASS));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.HEAVY_CORE));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.MACE));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.BREEZE_ROD));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.TRIAL_KEY));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.OMINOUS_TRIAL_KEY));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.ENCHANTED_GOLDEN_APPLE));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.SNIFFER_EGG));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DRIED_GHAST));
 
         // --- Deep Dark (Silk Touch only, hostile territory) ---
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.SCULK_CATALYST));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.SCULK_SENSOR));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.CALIBRATED_SCULK_SENSOR));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.SCULK_SHRIEKER));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.SCULK_CATALYST));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.SCULK_SENSOR));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.CALIBRATED_SCULK_SENSOR));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.SCULK_SHRIEKER));
 
         // --- Diamond gear & materials ---
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_BLOCK));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_SWORD));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_SPEAR));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_PICKAXE));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_AXE));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_SHOVEL));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_HOE));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_HELMET));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_CHESTPLATE));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_LEGGINGS));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_BOOTS));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_HORSE_ARMOR));
-        excluded.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_NAUTILUS_ARMOR));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_BLOCK));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_SWORD));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_SPEAR));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_PICKAXE));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_AXE));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_SHOVEL));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_HOE));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_HELMET));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_CHESTPLATE));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_LEGGINGS));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_BOOTS));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_HORSE_ARMOR));
+        defaults.add(BuiltInRegistries.ITEM.getKey(Items.DIAMOND_NAUTILUS_ARMOR));
 
-        return Set.copyOf(excluded);
+        return Set.copyOf(defaults);
     }
 
     private static LavaCanConfig instance;
 
-    private Set<Identifier> excluded;
+    private Set<Identifier> protectedItems;
 
     public static LavaCanConfig get() {
         if (instance == null) {
@@ -107,36 +112,52 @@ public class LavaCanConfig {
     }
 
     private LavaCanConfig() {
-        this.excluded = new HashSet<>();
+        this.protectedItems = new HashSet<>();
     }
 
     public void load() {
         if (!Files.exists(CONFIG_PATH)) {
-            this.excluded.addAll(DEFAULT_EXCLUDED);
+            this.protectedItems.addAll(DEFAULT_PROTECTED);
             save();
             return;
         }
 
         try (Reader reader = Files.newBufferedReader(CONFIG_PATH)) {
             JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
-            this.excluded = new HashSet<>();
+            this.protectedItems = new HashSet<>();
 
-            if (json.has("excluded") && json.get("excluded").isJsonArray()) {
-                JsonArray array = json.getAsJsonArray("excluded");
+            // Prefer the current key; fall back to the legacy "excluded" key for migration.
+            boolean migrated = false;
+            String key = null;
+            if (json.has(KEY_PROTECTED) && json.get(KEY_PROTECTED).isJsonArray()) {
+                key = KEY_PROTECTED;
+            } else if (json.has(KEY_LEGACY) && json.get(KEY_LEGACY).isJsonArray()) {
+                key = KEY_LEGACY;
+                migrated = true;
+            }
+
+            if (key != null) {
+                JsonArray array = json.getAsJsonArray(key);
                 for (JsonElement element : array) {
                     if (element.isJsonPrimitive()) {
                         String raw = element.getAsString().trim();
                         Identifier id = Identifier.tryParse(raw);
                         if (id != null) {
-                            this.excluded.add(id);
+                            this.protectedItems.add(id);
                         }
                     }
                 }
             }
+
+            // Rewrite the file under the new key so the legacy key disappears going forward.
+            if (migrated) {
+                LavaCan.LOGGER.info("Migrated LavaCan config from '{}' to '{}' key.", KEY_LEGACY, KEY_PROTECTED);
+                save();
+            }
         } catch (Exception e) {
             LavaCan.LOGGER.warn("Failed to load LavaCan config, using defaults", e);
-            this.excluded.clear();
-            this.excluded.addAll(DEFAULT_EXCLUDED);
+            this.protectedItems.clear();
+            this.protectedItems.addAll(DEFAULT_PROTECTED);
         }
     }
 
@@ -145,13 +166,13 @@ public class LavaCanConfig {
             Files.createDirectories(CONFIG_PATH.getParent());
 
             JsonObject json = new JsonObject();
-            JsonArray excludedArray = new JsonArray();
+            JsonArray protectedArray = new JsonArray();
 
-            for (Identifier id : this.excluded) {
-                excludedArray.add(id.toString());
+            for (Identifier id : this.protectedItems) {
+                protectedArray.add(id.toString());
             }
 
-            json.add("excluded", excludedArray);
+            json.add(KEY_PROTECTED, protectedArray);
 
             try (Writer writer = Files.newBufferedWriter(CONFIG_PATH)) {
                 writer.write(GSON.toJson(json));
@@ -161,8 +182,32 @@ public class LavaCanConfig {
         }
     }
 
-    public boolean isExcluded(Item item) {
+    public boolean isProtected(Item item) {
         Identifier id = BuiltInRegistries.ITEM.getKey(item);
-        return excluded.contains(id);
+        return protectedItems.contains(id);
+    }
+
+    // --- Accessors for the config UI -----------------------------------------------------------
+
+    public void setProtectedIds(List<String> ids) {
+        Set<Identifier> next = new HashSet<>();
+        for (String raw : ids) {
+            if (raw == null) {
+                continue;
+            }
+            Identifier id = Identifier.tryParse(raw.trim());
+            if (id != null) {
+                next.add(id);
+            }
+        }
+        this.protectedItems = next;
+    }
+
+    /** The default protected ids as a sorted list of strings (the config screen's "reset to default"). */
+    public static List<String> getDefaultProtectedIds() {
+        return DEFAULT_PROTECTED.stream()
+                .map(Identifier::toString)
+                .sorted()
+                .toList();
     }
 }

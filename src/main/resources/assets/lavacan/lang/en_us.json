@@ -1,0 +1,8 @@
+{
+	"screen.lavacan.config": "LavaCan Protected Items",
+	"screen.lavacan.protected": "Protected",
+	"screen.lavacan.available": "All Other Items",
+	"screen.lavacan.search": "Search…",
+	"screen.lavacan.reset": "Reset to Defaults",
+	"screen.lavacan.icons_unavailable": "(!) Item icons appear once a world has been loaded this session."
+}

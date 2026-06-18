@@ -2,15 +2,15 @@
 	"schemaVersion": 1,
 	"id": "lavacan",
 	"version": "${version}",
-	"name": "Lava Can",
-	"description": "Destroy unwanted items by dropping them onto a Lava Bucket. Fire-resistant items and a configurable exclusion list keep your valuables safe.",
+	"name": "LavaCan",
+	"description": "Destroy unwanted items by dropping them onto a Lava Bucket. Fire-resistant items and a configurable protection list keep your valuables safe.",
 	"authors": [
-		"tapm"
+		"TAPM"
 	],
 	"contact": {
 		"homepage": "https://modrinth.com/mod/lavacan",
-		"sources": "https://github.com/tapm/lavacan",
-		"issues": "https://github.com/tapm/lavacan/issues"
+		"sources": "https://github.com/TAPM04/lavacan",
+		"issues": "https://github.com/TAPM04/lavacan/issues"
 	},
 	"license": "MIT",
 	"icon": "assets/lavacan/icon.png",
@@ -21,6 +21,9 @@
 		],
 		"client": [
 			"tapm.lavacan.client.LavaCanClient"
+		],
+		"modmenu": [
+			"tapm.lavacan.client.config.ModMenuIntegration"
 		]
 	},
 	"mixins": [
@@ -31,9 +34,12 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.19.2",
-		"minecraft": "~26.2-",
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
 		"java": ">=25",
 		"fabric-api": "*"
+	},
+	"suggests": {
+		"modmenu": "*"
 	}
 }

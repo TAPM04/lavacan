@@ -33,7 +33,7 @@ public class LavaCanRules {
             ItemStack carriedItemStack = menu.getCarried();
             if (carriedItemStack.is(Items.WATER_BUCKET)) return Outcome.CRAFT_OBSIDIAN_CURSOR;
             if (isFireResistant(carriedItemStack, player.level())
-                    || LavaCanConfig.get().isExcluded(carriedItemStack.getItem())
+                    || LavaCanConfig.get().isProtected(carriedItemStack.getItem())
                     || carriedItemStack.is(Items.LAVA_BUCKET)) return Outcome.NO_ACTION;
             return Outcome.DELETE_CURSOR;
         }
@@ -48,7 +48,7 @@ public class LavaCanRules {
             ItemStack slotItemStack = menu.slots.get(slotIndex).getItem();
             if (slotItemStack.is(Items.WATER_BUCKET)) return Outcome.CRAFT_OBSIDIAN_SLOT;
             if (isFireResistant(slotItemStack, player.level())
-                    || LavaCanConfig.get().isExcluded(slotItemStack.getItem())
+                    || LavaCanConfig.get().isProtected(slotItemStack.getItem())
                     || slotItemStack.is(Items.LAVA_BUCKET)) return Outcome.NO_ACTION;
 
             return Outcome.DELETE_TARGET_SLOT;
