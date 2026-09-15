@@ -5,6 +5,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.util.Prediction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,13 +28,13 @@ public class AbstractContainerMenuMixin {
                 self.setCarried(Items.BUCKET.getDefaultInstance());
                 self.slots.get(slotIndex).set(Items.BUCKET.getDefaultInstance());
                 ItemStack obsidian = Items.OBSIDIAN.getDefaultInstance();
-                if (!player.addItem(obsidian)) player.drop(obsidian, false);
+                if (!player.addItem(obsidian)) player.drop(obsidian, false, Prediction.PREDICTED);
             }
             case CRAFT_OBSIDIAN_SLOT -> {
                 player.getInventory().setItem(buttonNum, Items.BUCKET.getDefaultInstance());
                 self.slots.get(slotIndex).set(Items.BUCKET.getDefaultInstance());
                 ItemStack obsidian = Items.OBSIDIAN.getDefaultInstance();
-                if (!player.addItem(obsidian)) player.drop(obsidian, false);
+                if (!player.addItem(obsidian)) player.drop(obsidian, false, Prediction.PREDICTED);
             }
             case DELETE_CURSOR -> self.setCarried(ItemStack.EMPTY);
             case DELETE_TARGET_SLOT -> self.slots.get(slotIndex).set(ItemStack.EMPTY);
